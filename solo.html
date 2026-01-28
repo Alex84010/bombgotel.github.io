@@ -87,6 +87,24 @@
             [{ x: 100, y: 500 }, { x: 300, y: 350 }, { x: 500, y: 200 }, { x: 700, y: 100 }]
         ];
 
+var mobileLeft = false;
+var mobileRight = false;
+
+function moveLeft() {
+    mobileLeft = true;
+    mobileRight = false;
+}
+
+function moveRight() {
+    mobileRight = true;
+    mobileLeft = false;
+}
+
+function stopMove() {
+    mobileLeft = false;
+    mobileRight = false;
+}
+        
         // Fonction preload: charger tous les assets (images, sprites) avant le jeu
         function preload() {
             this.load.image('sky', 'assets/sky.png'); // Charger l'image du ciel
@@ -189,9 +207,6 @@
                 repeat: -1
             });
 
-            // Récupérer les touches du clavier
-            cursors = this.input.keyboard.createCursorKeys();
-
             // Créer les étoiles à collecter
             stars = this.physics.add.group({ key: 'star', repeat: 11, setXY: { x: 12, y: 0, stepX: 70 } });
             stars.children.iterate(c => {
@@ -214,30 +229,33 @@
             this.physics.add.collider(stars, tremplin);
             this.physics.add.collider(bombs, tremplin);
             this.physics.add.collider(player, tremplin, bounceOnTrampoline, null, this);
+
+            this.input.on('pointerdown', () => {
+                if (player.body.touching.down) {
+                    player.setVelocityY(-330);
+                }
+            });
         }
 
         // Fonction update: mise à jour du jeu à chaque frame
         function update() {
-            // Si le jeu est fini, ne rien faire
+
             if (gameOver) return;
 
-            // Gérer les déplacements du joueur avec les flèches du clavier
-            if (cursors.left.isDown) {
-                player.setVelocityX(-160); // Déplacer vers la gauche
+            if (mobileLeft) {
+                player.setVelocityX(-160);
                 player.anims.play('left', true);
-            } else if (cursors.right.isDown) {
-                player.setVelocityX(160); // Déplacer vers la droite
-                player.anims.play('right', true);
-            } else {
-                player.setVelocityX(0); // Arrêter le mouvement horizontal
-                player.anims.play('turn'); // Animation de repos
-            }
 
-            // Permettre au joueur de sauter s'il est sur une plateforme
-            if (cursors.up.isDown && player.body.touching.down) {
-                player.setVelocityY(-330); // Appliquer une vélocité vers le haut
+            } else if (mobileRight) {
+                player.setVelocityX(-160);
+                player.anims.play('right', true);
+
+            } else {
+                player.setVelocityX(0);
+                player.anims.play('turn');
             }
         }
+                
 
         // Fonction appelée quand le joueur collecte une étoile
         function collectStar(player, star) {
@@ -315,3 +333,4 @@
 </body>
 
 </html>
+
